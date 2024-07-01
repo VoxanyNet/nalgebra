@@ -1,4 +1,6 @@
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+use diff::Diff;
+use num::real::Real;
 use std::fmt;
 use std::hash;
 
@@ -13,6 +15,8 @@ use crate::base::dimension::{DimNameAdd, DimNameSum, U1};
 use crate::base::storage::Owned;
 use crate::base::{Const, DefaultAllocator, OMatrix, SVector, Scalar, Unit};
 use crate::geometry::{AbstractRotation, Point, Translation};
+use crate::TranslationDiff;
+use crate::UnitComplex;
 
 #[cfg(feature = "rkyv-serialize")]
 use rkyv::bytecheck;
@@ -87,6 +91,49 @@ pub struct Isometry<T, R, const D: usize> {
     pub rotation: R,
     /// The pure translational part of this isometry.
     pub translation: Translation<T, D>,
+}
+#[cfg_attr(feature="serde-serialize-no-std", derive(Serialize, Deserialize))]
+#[derive(Copy, Clone)]
+/// Isometry diff
+pub struct IsometryDiff {
+    /// Rotation diff
+    pub rotation: Option<UnitComplex<f32>>,
+    /// Translation diff
+    pub translation: Option<TranslationDiff>
+}
+
+impl Diff for Isometry<f32, UnitComplex<f32>, 2> {
+    type Repr = IsometryDiff;
+    fn diff(&self, other: &Self) -> Self::Repr {
+        let mut diff = Self::Repr {
+            rotation: None,
+            translation: None,
+        };
+
+        if other.rotation != self.rotation {
+            diff.rotation = Some(other.rotation);
+        };
+
+        if other.translation != self.translation {
+            diff.translation = Some(self.translation.diff(&other.translation));
+        };
+
+        diff
+    }
+
+    fn apply(&mut self, diff: &Self::Repr) {
+        if let Some(rotation) = diff.rotation {
+            self.rotation = rotation
+        };
+
+        if let Some(translation_diff) = &diff.translation {
+            self.translation.apply(translation_diff);
+        };
+    }
+
+    fn identity() -> Self {
+        Self::default()
+    }
 }
 
 impl<T: Scalar + hash::Hash, R: hash::Hash, const D: usize> hash::Hash for Isometry<T, R, D>

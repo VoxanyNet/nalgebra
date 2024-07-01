@@ -1,4 +1,5 @@
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+use diff::Diff;
 use num::{One, Zero};
 use std::fmt;
 use std::hash;
@@ -37,6 +38,40 @@ pub struct Translation<T, const D: usize> {
     /// The translation coordinates, i.e., how much is added to a point's coordinates when it is
     /// translated.
     pub vector: SVector<T, D>,
+}
+#[cfg_attr(feature="serde-serialize-no-std", derive(Serialize, Deserialize))]
+#[derive(Copy, Clone)]
+/// Translation diff
+pub struct TranslationDiff {
+    /// Vector diff
+    vector: Option<SVector<f32, 2>>
+}
+
+impl Diff for Translation<f32, 2> {
+
+    type Repr = TranslationDiff;
+
+    fn diff(&self, other: &Self) -> Self::Repr {
+        let mut diff = Self::Repr {
+            vector: None,
+        };
+
+        if other.vector != self.vector {
+            diff.vector = Some(other.vector);
+        };
+
+        diff
+    }
+
+    fn apply(&mut self, diff: &Self::Repr) {
+        if let Some(vector) = diff.vector {
+            self.vector = vector
+        };
+    }
+
+    fn identity() -> Self {
+        Self::default()
+    }
 }
 
 impl<T: fmt::Debug, const D: usize> fmt::Debug for Translation<T, D> {
