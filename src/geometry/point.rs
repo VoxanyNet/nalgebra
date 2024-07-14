@@ -1,4 +1,5 @@
 use approx::{AbsDiffEq, RelativeEq, UlpsEq};
+use diff::Diff;
 use num::{One, Zero};
 use std::cmp::Ordering;
 use std::fmt;
@@ -59,6 +60,38 @@ where
 {
     /// The coordinates of this point, i.e., the shift from the origin.
     pub coords: OVector<T, D>,
+}
+/// Diff for OPoint
+#[derive(Copy, Clone)]
+pub struct OPointDiff {
+
+    /// Coords diff
+    pub coords: Option<OVector<i32, Const<2>>>
+}
+impl Diff for OPoint<i32, Const<2>> {
+    type Repr = OPointDiff;
+
+    fn diff(&self, other: &Self) -> Self::Repr {
+        let mut diff = OPointDiff {
+            coords: None,
+        };
+
+        if other.coords != self.coords {
+            diff.coords = Some(other.coords);
+        }
+
+        diff
+    }
+
+    fn apply(&mut self, diff: &Self::Repr) {
+        if let Some(coords) = diff.coords {
+            self.coords = coords;
+        }
+    }
+
+    fn identity() -> Self {
+        Self::default()
+    }
 }
 
 impl<T: Scalar + fmt::Debug, D: DimName> fmt::Debug for OPoint<T, D>
