@@ -109,7 +109,7 @@ glam025 = { package = "glam", version = "0.25", optional = true }
 glam027 = { package = "glam", version = "0.27", optional = true }
 glam028 = { package = "glam", version = "0.28", optional = true }
 rayon = { version = "1.6", optional = true }
-diff-struct = {git = "https://github.com/VoxanyNet/diff-struct"}
+diff-struct = {git = "https://github.com/VoxanyNet/diff-struct", rev = "9f3990a29011bbbb84c40ca21f110ef8a1d343d0"}
 
 [dev-dependencies]
 serde_json = "1.0"
