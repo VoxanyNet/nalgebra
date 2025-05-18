@@ -63,7 +63,7 @@ impl Diff for Translation<f32, 2> {
         diff
     }
 
-    fn apply(&mut self, diff: &Self::Repr) {
+    fn apply(&mut self, diff: &mut Self::Repr) {
         if let Some(vector) = diff.vector {
             self.vector = vector
         };

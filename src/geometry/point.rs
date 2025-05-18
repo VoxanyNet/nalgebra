@@ -83,7 +83,7 @@ impl Diff for OPoint<i32, Const<2>> {
         diff
     }
 
-    fn apply(&mut self, diff: &Self::Repr) {
+    fn apply(&mut self, diff: &mut Self::Repr) {
         if let Some(coords) = diff.coords {
             self.coords = coords;
         }

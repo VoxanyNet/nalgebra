@@ -121,12 +121,12 @@ impl Diff for Isometry<f32, UnitComplex<f32>, 2> {
         diff
     }
 
-    fn apply(&mut self, diff: &Self::Repr) {
+    fn apply(&mut self, diff: &mut Self::Repr) {
         if let Some(rotation) = diff.rotation {
             self.rotation = rotation
         };
 
-        if let Some(translation_diff) = &diff.translation {
+        if let Some(translation_diff) = &mut diff.translation {
             self.translation.apply(translation_diff);
         };
     }
